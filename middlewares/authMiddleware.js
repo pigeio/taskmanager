@@ -4,11 +4,11 @@ const User = require("../models/User");
 //middleware to protect routes
 const protect = async (req,res,next) => {
     try{
-        let token = req.headers.authorization;
+        let tokenHeader = req.headers.authorization || "";
         console.log("Authorization Header:", token);
 
         if(token && token.startsWith("Bearer")){
-            token = token.split(" ")[1];
+            const token = tokenHeader.split(" ")[1];
             console.log("Extracted token:", token);
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);

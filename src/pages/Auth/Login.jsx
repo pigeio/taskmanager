@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../../components/layouts/AuthLayout";
 import Input from "../../components/Inputs/Input";
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { UserContext } from '../../context/userContext';
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  
+  const {updateUser} = useContext(UserContext);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -43,23 +47,60 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log("Login submitted with:", email , password);
+    
     
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-
+    setError(null);
+    
+    //Login API Call
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Replace with actual authentication logic:
-      // const user = await authService.login(email, password);
-      navigate("/dashboard");
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+
+      console.log("Login raw response :", response);
+
+      const { token, role: backendRole, user } = response;
+      const role = backendRole === "member" ? "user" : backendRole;
+
+      // Destructure response data
+
+      if (token) {
+        // Store token and user data
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", role);
+
+        updateUser({user, token , role});
+        
+        
+        // Redirect based on role
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/user/dashboard");
+        }
+      } else {
+        throw new Error("Authentication failed: No token received");
+      }
     } catch (err) {
-      setError(err.message || "Invalid email or password. Please try again.");
-    } finally {
+      // Handle API errors
+      console.error("Login error:", err);
+
+      const errorMessage = err.response?.data?.message || 
+                         err.message || 
+                         "Invalid email or password. Please try again.";
+      setError(errorMessage);
+      
+      // Clear password field on error (security best practice)
+      setPassword("");
+    }finally{
       setIsLoading(false);
     }
   };
@@ -82,6 +123,7 @@ const Login = () => {
             placeholder="john@example.com"
             type="email"
             autoComplete="username"
+            required
           />
 
           <Input
@@ -91,6 +133,7 @@ const Login = () => {
             placeholder="Min 8 characters"
             type="password"
             autoComplete="current-password"
+            required
           />
 
           <div className="flex justify-end text-sm mb-2">

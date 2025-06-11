@@ -167,7 +167,6 @@ const updateTask = async (req, res) => {
 
 
 // Delete a task
-const mongoose = require("mongoose");
 
 const deleteTask = async (req, res) => {
     try {

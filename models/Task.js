@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { applyTimestamps } = require("./User");
 
-const todoschema = new mongoose.Schema({
+const todoSchema = new mongoose.Schema({
     text: {type:String , required: false},
     completed:{type:Boolean,default:false},
 });

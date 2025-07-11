@@ -21,7 +21,7 @@ const registerUser = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            role: "member", // Default role
+            role: "user", // Default role
         });
 
         await newUser.save();
@@ -42,8 +42,8 @@ const getUsers = async (req, res) => {
         const usersWithTaskCounts = await Promise.all(
             users.map(async (user) => {
                 const pendingTasks = await Task.countDocuments({ assignedTo: user._id, status: "Pending" });
-                const inProgressTasks = await Task.countDocuments({ assignedTo: user._id, status: "In progress" });
-                const completedTasks = await Task.countDocuments({ assignedTo: user._id, status: "Complete" });
+                const inProgressTasks = await Task.countDocuments({ assignedTo: user._id, status: "In Progress" });
+                const completedTasks = await Task.countDocuments({ assignedTo: user._id, status: "Completed" });
 
                 return {
                     ...user._doc,

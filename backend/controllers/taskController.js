@@ -335,7 +335,7 @@ const getDashboardData = async (req, res) => {
       .select("title status priority dueDate createdAt");
 
     res.status(200).json({
-      stastics:{
+      statistics:{
         totalTasks,
         pendingTasks,
         completedTasks,
@@ -364,7 +364,7 @@ const getUserDashboardData = async (req, res) => {
       const overdueTasks = await Task.countDocuments({
         assignedTo: userId,
         status: { $ne: "Completed" },
-        dueDate: { $It: new Date() },
+        dueDate: { $lt: new Date() },
       });
 
       const taskStatuses = ["pending" , " In Progress" , "Completed"];
@@ -380,6 +380,22 @@ const getUserDashboardData = async (req, res) => {
         return acc;
       }, {});
       
+      const taskPriorities = ["Low" , "Medium" , "High"];
+      const taskPriorityLevelRaw = await Task.aggregate([
+        {$match: {assignedTo: userId} },
+        {
+          $group: {
+            _id: "$priority",
+            count: { $sum: 1},
+          },
+        },
+      ]);
+
+      const taskPriorityLevels = taskPriorities.reduce((acc ,priority) => {
+        acc[priority] = 
+        taskPriorityLevelRaw.find((item) => item._id === priority)?.count || 0;
+        return acc;
+      }, {});
       
       const recentTasks = await Task.find({assignedTo: userId})
       .sort({createdAt: -1})
@@ -395,6 +411,7 @@ const getUserDashboardData = async (req, res) => {
         },
         charts: {
           taskDistribution,
+          taskPriorityLevels    
         },
         recentTasks,
       });

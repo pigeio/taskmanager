@@ -42,7 +42,7 @@ const Login = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("role", role);
-        updateUser({ user, token, role });
+        updateUser({ ...user, token, role });
         setTimeout(() => {
           navigate(role === "admin" ? "/admin/dashboard" : "/user/dashboard");
         } ,100);

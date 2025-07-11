@@ -27,17 +27,17 @@ const UserCard = ({ userInfo }) => {
       <div className='flex items-end gap-3 mt-5'>
         <StatCard
           label='Pending'
-          count={userInfo?.pendingtasks || 0}
+          count={userInfo?.pendingTasks || 0}
           status='Pending'
         />
         <StatCard
           label='In Progress'
-          count={userInfo?.inprogresstasks || 0}
+          count={userInfo?.inProgressTasks || 0}
           status='In Progress'
         />
         <StatCard
           label='Completed'
-          count={userInfo?.completedtasks || 0}
+          count={userInfo?.completedTasks || 0}
           status='Completed'
         />
       </div>
@@ -47,7 +47,6 @@ const UserCard = ({ userInfo }) => {
 
 export default UserCard;
 
-// ✅ Corrected StatCard definition
 const StatCard = ({ label, count, status }) => {
   const getStatusTagColor = () => {
     switch (status) {

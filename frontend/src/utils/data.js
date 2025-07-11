@@ -17,11 +17,11 @@ export const SIDE_MENU_DATA = [
     id: 2,
     title: "Manage tasks", 
     icon: LuClipboardCheck,          
-    path: "/admin/create-task", 
+    path: "/admin/tasks", 
   },
   {
     id: 3,
-    title: "Team Members",
+    title: "Manage Users",
     icon: LuUsers,          //LuUsers
     path: "/admin/users",   ///admin/users
   },
@@ -29,7 +29,7 @@ export const SIDE_MENU_DATA = [
     id: 4,
     title: "Create Tasks",  //Team Members
     icon: LuSquarePlus,    //LuSquarePlus
-    path: "/tasks/new",    ///tasks/new
+    path: "/admin/create-task",  //tasks/new
   },
   {
     id: 5,
@@ -48,29 +48,18 @@ export const SIDE_MENU_USER_DATA = [
   },
   {
     id: 2,
-    title: "Manage Tasks",
-    icon: LuUsers,
-    path: "/user/tasks",
-  },
-  {
-    id: 3,
-    title: "Team Members",
+    title: "My Tasks",
     icon: LuClipboardCheck,
     path: "/user/tasks",
   },
   {
-    id: 4,
-    title: "Create Tasks",
-    icon: LuSquarePlus,
-    path: "/admin/create-task",
-  },
-  {
-    id: 5,
+    id: 3,
     title: "Logout",
     icon: LuLogOut,
     path: "/logout",
   },
 ];
+
 
 export const PRIORITY_DATA = [
     {label: "Low" , value: "Low"},

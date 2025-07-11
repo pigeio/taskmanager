@@ -34,7 +34,8 @@ const SelectUsers = ({ selectedUsers = [], setSelectedUsers }) => {
   };
 
   const handleAssign = () => {
-    setSelectedUsers(tempSelectedUsers);
+    console.log("Assigned IDs:" , tempSelectedUsers);
+    setSelectedUsers([...tempSelectedUsers]);
     setIsModalOpen(false);
   };
 

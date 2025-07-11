@@ -75,7 +75,7 @@ const UserDashboard = () => {
     }
   };
 
-  const onSeeMore = () => navigate("/admin/tasks");
+  const onSeeMore = () => navigate("/user/tasks");
 
   const getGreeting = () => {
     const hour = moment().hour();

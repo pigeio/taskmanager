@@ -23,7 +23,8 @@ const SignUp = () => {
 
   // Redirect user after signup based on role
   useEffect(() => {
-    if (!isLoading && user && user.role) {
+    console.log("Redirecting with user:" , user);
+    if (user && user.role) {
       const role = user.role === "member" ? "user" : user.role;
       if (role === "admin") {
         navigate("/admin/dashboard");
@@ -31,7 +32,7 @@ const SignUp = () => {
         navigate("/user/dashboard");
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, navigate]);
 
   // Handle SignUp Form Submit
   const handleSignUp = async (e) => {
@@ -92,7 +93,7 @@ const SignUp = () => {
       localStorage.setItem("role", normalizedRole);
 
       updateUser({ user, token, role : normalizedRole});
-      
+      navigate(`/${normalizedRole}/dashboard`);
  
     } catch (error) {
       console.error("SignUp Error:" , error);

@@ -12,21 +12,34 @@ const UserProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     const localUser = localStorage.getItem("user");
 
-    if (!token || !localUser) {
+    let parsedUser = null;
+    try {
+      if (localUser) {
+        parsedUser = JSON.parse(localUser);
+      }
+    } catch (err) {
+      console.error("Failed to parse user from localStorage:", err);
+      parsedUser = null;
+    }
+
+    if (!token || !parsedUser) {
       setLoading(false);
       return;
     }
 
-    const parsedUser = JSON.parse(localUser);
-    setUser(parsedUser); // ✅ Set user immediately to prevent flicker
+    setUser(parsedUser);
 
     const fetchUser = async () => {
       try {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
-        setUser(response.data); // ✅ Optional: update from server
+        setUser({
+          ...response.data,
+          token,
+          role: localStorage.getItem("role"),
+        });
       } catch (error) {
         console.error("User not authenticated", error);
-        clearUser(); // ❌ Removed invalid JSON.parse
+        clearUser();
       } finally {
         setLoading(false);
       }
@@ -36,9 +49,10 @@ const UserProvider = ({ children }) => {
   }, []);
 
   const updateUser = ({ user, token, role }) => {
-    setUser(user);
+    const mergedUser = { ...user, token, role };
+    setUser(mergedUser);
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", JSON.stringify(mergedUser)); // ✅ fixed
     localStorage.setItem("role", role);
     setLoading(false);
   };
@@ -58,6 +72,7 @@ const UserProvider = ({ children }) => {
 };
 
 export default UserProvider;
+
 
 
 

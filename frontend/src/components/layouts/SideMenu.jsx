@@ -49,7 +49,7 @@ const SideMenu = ({ activeMenu }) => {
       {/* Menu Items */}
       <div className="space-y-2">
         {sideMenuData.map((item, index) => {
-          const isActive = activeMenu?.startsWith(item.path);
+          const isActive = activeMenu === item.path;
           return (
             <button
               key={`menu_${index}`}

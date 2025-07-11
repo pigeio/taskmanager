@@ -29,8 +29,9 @@ const CreateTask = () => {
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
 
-  const handleValueChange = (key, value) =>
+  const handleValueChange = (key, value) =>{
     setTaskData((prev) => ({ ...prev, [key]: value }));
+  };
 
   const clearData = () =>
     setTaskData({
@@ -58,9 +59,10 @@ const CreateTask = () => {
     }
   };
 
-  const createTask = async () => {
+  const createTask = async () => {``
     try {
       setLoading(true);
+      console.log("Assigned Users in taskData:" , taskData.assignedUsers);
       const payload = {
         title: taskData.title,
         description: taskData.description,
@@ -184,9 +186,9 @@ const CreateTask = () => {
             </label>
             <SelectUsers
               selectedUsers={taskData.assignedUsers}
-              setSelectedUsers={(ids) =>
+              setSelectedUsers={(ids) =>{
                 handleValueChange("assignedUsers", ids)
-              }
+              }}
             />
           </div>
 
@@ -222,7 +224,7 @@ const CreateTask = () => {
               </label>
               <input
                 type="date"
-                value={taskData.dueDate}
+                value={taskData.dueDate ? taskData.dueDate.slice(0 , 10) : ""}
                 onChange={(e) =>
                   handleValueChange("dueDate", e.target.value)
                 }

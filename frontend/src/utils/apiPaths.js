@@ -1,7 +1,7 @@
-export const BASE_URL = "http://localhost:8000";
+export const BASE_URL = "https://taskmanager-phmf.onrender.com";
 
 export const API_PATHS = {
-  
+
   AUTH: {
     REGISTER: "/api/auth/register",          // Register new user (admin / member)
     LOGIN: "/api/auth/login",                // Login – returns JWT
@@ -19,7 +19,7 @@ export const API_PATHS = {
     DELETE: (id) => `/api/users/${id}`             // DELETE → delete user by id
   },
 
-  
+
   TASKS: {
     // Dashboard
     GET_DASHBOARD_DATA: "/api/tasks/dashboard-data",       // Admin dashboard
@@ -35,14 +35,14 @@ export const API_PATHS = {
     UPDATE_TODO: (id) => `/api/tasks/${id}/todo`     // PUT  → update checklist
   },
 
-  
+
   REPORTS: {
     EXPORT_TASKS: "/api/reports/export/tasks",       // Export tasks CSV / Excel
     EXPORT_USERS: "/api/reports/export/users"        // Export users CSV / Excel
   },
 
   UPLOAD: {
-  IMAGE: "/api/upload/image" 
+    IMAGE: "/api/upload/image"
   }
 
 };

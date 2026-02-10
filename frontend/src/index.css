@@ -1,15 +1,16 @@
-/* Import Google Font */
+@import "tailwindcss";
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&display=swap');
 
-/* Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+}
 
-/* Base styles */
 @layer base {
   html {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-sans);
   }
 
   body {
@@ -17,14 +18,13 @@
   }
 }
 
-/* Custom reusable components */
 @layer components {
-   .input-box {
+  .input-box {
     @apply w-full px-4 py-3 rounded border border-gray-300 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400;
   }
 
   .btn-primary {
-    @apply w-full text-sm font-medium text-white bg-primary shadow-lg shadow-purple-600/10 p-[10px] rounded-md my-1 hover:bg-primary-dark transition duration-200 cursor-pointer;
+    @apply w-full text-sm font-medium text-white bg-primary shadow-lg shadow-purple-600/10 p-[10px] rounded-md my-1 hover:bg-[var(--color-primary-dark)] transition duration-200 cursor-pointer;
   }
 
   .card {
@@ -43,8 +43,7 @@
     @apply flex items-center text-xs md:text-[13px] text-lime-100 md:px-3 py-2 rounded border border-lime-200 hover:border-lime-400 cursor-pointer;
   }
 
-  .user-card{
+  .user-card {
     @apply bg-white p-4 rounded-xl shadow shadow-gray-100 border border-gray-200/50;
   }
 }
-

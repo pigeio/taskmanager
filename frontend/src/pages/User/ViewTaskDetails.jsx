@@ -6,6 +6,7 @@ import { API_PATHS } from '../../utils/apiPaths';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import AvatarGroup from '../../components/layouts/AvatarGroup';
 import { LuSquareArrowOutUpRight } from 'react-icons/lu';
+import TaskComments from '../../components/Cards/TaskComments';
 
 const ViewTaskDetails = () => {
   const { id } = useParams();
@@ -141,6 +142,11 @@ const ViewTaskDetails = () => {
                   ))}
                 </div>
               )}
+              {/* Comments Section */}
+              <div className="mt-8">
+                <TaskComments taskId={id} />
+              </div>
+
             </div>
           </div>
         )}
@@ -167,9 +173,8 @@ const TodoChecklistItem = ({ text, isChecked, onChange }) => (
       className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-0 cursor-pointer"
     />
     <p
-      className={`text-sm ${
-        isChecked ? "line-through text-gray-400" : "text-gray-800"
-      }`}
+      className={`text-sm ${isChecked ? "line-through text-gray-400" : "text-gray-800"
+        }`}
     >
       {text}
     </p>

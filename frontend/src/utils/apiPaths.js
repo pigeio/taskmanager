@@ -32,7 +32,10 @@ export const API_PATHS = {
     UPDATE: (id) => `/api/tasks/${id}`,             // PUT  → update task body
     DELETE: (id) => `/api/tasks/${id}`,           // DELETE → delete task
     UPDATE_STATUS: (id) => `/api/tasks/${id}/status`,// PUT  → update status only
-    UPDATE_TODO: (id) => `/api/tasks/${id}/todo`     // PUT  → update checklist
+    UPDATE_STATUS: (id) => `/api/tasks/${id}/status`,// PUT  → update status only
+    UPDATE_TODO: (id) => `/api/tasks/${id}/todo`,     // PUT  → update checklist
+    ADD_COMMENT: (id) => `/api/tasks/${id}/comments`,
+    GET_COMMENTS: (id) => `/api/tasks/${id}/comments`
   },
 
 

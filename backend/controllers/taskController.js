@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Task = require("../models/Task");
+const Comment = require("../models/Comment");
 
 // Get all tasks
 //@route  Get/api/tasks/
@@ -9,8 +10,10 @@ const Task = require("../models/Task");
 const getTasks = async (req, res) => {
   try {
     /* ─────────── 1. Build base filter ─────────── */
-    const { status } = req.query;
-    const baseFilter = status ? { status } : {};
+    const { status, priority } = req.query;
+    const baseFilter = {};
+    if (status) baseFilter.status = status;
+    if (priority) baseFilter.priority = priority;
 
     /* ─────────── 2. Scope by role ─────────── */
     const roleFilter =
@@ -70,59 +73,59 @@ const getTasks = async (req, res) => {
 
 // Get task by ID
 const getTaskById = async (req, res) => {
-    try {
-        // logic here
-        console.log("Task ID param:", req.params.id);
-        const task = await Task.findById(req.params.id).populate(
-            "assignedTo",
-            "name email profileImageUrl"
-        );
+  try {
+    // logic here
+    console.log("Task ID param:", req.params.id);
+    const task = await Task.findById(req.params.id).populate(
+      "assignedTo",
+      "name email profileImageUrl"
+    );
 
-        if(!task) return res.status(404).json({message : "task not found"});
-        
-        res.json(task);
+    if (!task) return res.status(404).json({ message: "task not found" });
+
+    res.json(task);
 
 
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 // Create a new task
 const createTask = async (req, res) => {
-    try {
-        // logic here
-        const{
-            title,
-            description,
-            priority,
-            dueDate,
-            assignedTo,
-            attachements,
-            todoChecklist,
-        } = req.body;
+  try {
+    // logic here
+    const {
+      title,
+      description,
+      priority,
+      dueDate,
+      assignedTo,
+      attachements,
+      todoChecklist,
+    } = req.body;
 
-        if(!Array.isArray(assignedTo)) {
-            return res
-            .status(400)
-            .json({message: "assignedTo must be an array of user IDs"});
-        }
-
-        const task = await Task.create({
-            title,
-            description,
-            priority,
-            dueDate,
-            assignedTo,
-            createdBy:req.user._id,
-            todoChecklist,
-            attachements,
-        });
-
-        res.status(201).json({message:"Task created successfully" , task});
-    } catch (error) {
-        res.status(400).json({ message: "Error creating task", error: error.message });
+    if (!Array.isArray(assignedTo)) {
+      return res
+        .status(400)
+        .json({ message: "assignedTo must be an array of user IDs" });
     }
+
+    const task = await Task.create({
+      title,
+      description,
+      priority,
+      dueDate,
+      assignedTo,
+      createdBy: req.user._id,
+      todoChecklist,
+      attachements,
+    });
+
+    res.status(201).json({ message: "Task created successfully", task });
+  } catch (error) {
+    res.status(400).json({ message: "Error creating task", error: error.message });
+  }
 };
 
 // Update a task
@@ -143,13 +146,13 @@ const updateTask = async (req, res) => {
       assignedTo
     } = req.body;
 
-    if (title)         task.title         = title;
-    if (description)   task.description   = description;
-    if (priority)      task.priority      = priority;
-    if (status)        task.status        = status;
-    if (dueDate)       task.dueDate       = dueDate;
+    if (title) task.title = title;
+    if (description) task.description = description;
+    if (priority) task.priority = priority;
+    if (status) task.status = status;
+    if (dueDate) task.dueDate = dueDate;
     if (todoChecklist) task.todoChecklist = todoChecklist;
-    if (attachments)   task.attachments   = attachments;
+    if (attachments) task.attachments = attachments;
 
     if (assignedTo) {
       if (!Array.isArray(assignedTo))
@@ -169,21 +172,21 @@ const updateTask = async (req, res) => {
 // Delete a task
 
 const deleteTask = async (req, res) => {
-    try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: "Invalid Task ID" });
-        }
-
-        const deletedTask = await Task.findByIdAndDelete(req.params.id);
-
-        if (!deletedTask) {
-            return res.status(404).json({ message: "Task not found" });
-        }
-
-        res.json({ message: "Task deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid Task ID" });
     }
+
+    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json({ message: "Task deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 
@@ -192,37 +195,37 @@ const deleteTask = async (req, res) => {
 // Update task status
 
 const updateTaskStatus = async (req, res) => {
-    try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: "Invalid Task ID" });
-        }
-
-        const task = await Task.findById(req.params.id);
-        if (!task) return res.status(404).json({ message: "Task not found" });
-
-        const isAssigned = task.assignedTo.some(
-            (userId) => userId.toString() === req.user._id.toString()
-        );
-
-        if (!isAssigned && req.user.role !== "admin") {
-            return res.status(403).json({ message: "Not authorized" });
-        }
-
-        task.status = req.body.status || task.status;
-
-        if (task.status === "Complete") {
-            task.todoChecklist = task.todoChecklist.map((item) => ({
-                ...item,
-                completed: true
-            }));
-            task.progress = 100;
-        }
-
-        await task.save();
-        res.json({ message: "Task status updated", task });
-    } catch (error) {
-        res.status(400).json({ message: "Error updating status", error: error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid Task ID" });
     }
+
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+
+    if (!isAssigned && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    task.status = req.body.status || task.status;
+
+    if (task.status === "Complete") {
+      task.todoChecklist = task.todoChecklist.map((item) => ({
+        ...item,
+        completed: true
+      }));
+      task.progress = 100;
+    }
+
+    await task.save();
+    res.json({ message: "Task status updated", task });
+  } catch (error) {
+    res.status(400).json({ message: "Error updating status", error: error.message });
+  }
 };
 
 
@@ -255,16 +258,16 @@ const updateTaskCheckList = async (req, res) => {
     /* 5. Replace checklist & recalc progress */
     task.todoChecklist = todoChecklist;
 
-    const totalItems     = task.todoChecklist.length;
+    const totalItems = task.todoChecklist.length;
     const completedCount = task.todoChecklist.filter((i) => i.completed).length;
 
     task.progress = totalItems
       ? Math.round((completedCount / totalItems) * 100)
       : 0;
 
-    if (task.progress === 100)      task.status = "Completed";
-    else if (task.progress > 0)     task.status = "In Progress";
-    else                            task.status = "Pending";
+    if (task.progress === 100) task.status = "Completed";
+    else if (task.progress > 0) task.status = "In Progress";
+    else task.status = "Pending";
 
     await task.save();
 
@@ -289,59 +292,59 @@ const getDashboardData = async (req, res) => {
   try {
     // logic here
     const totalTasks = await Task.countDocuments();
-    const pendingTasks = await Task.countDocuments({status: "pending"});
-    const completedTasks = await Task.countDocuments({status: "Completed"});
+    const pendingTasks = await Task.countDocuments({ status: "pending" });
+    const completedTasks = await Task.countDocuments({ status: "Completed" });
     const overdueTasks = await Task.countDocuments({
-    status: {$ne :" Completed"},
-    dueDate: {$lt: new Date()},
+      status: { $ne: " Completed" },
+      dueDate: { $lt: new Date() },
     });
 
-    const taskStatuses = ["Pending", "In Progress" , "Completed"];
+    const taskStatuses = ["Pending", "In Progress", "Completed"];
     const taskDistributionRaw = await Task.aggregate([
-    {
-      $group:{
-        _id:"$status",
-        count:{ $sum:1 },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
       },
-    },
     ]);
-    const taskDistribution = taskStatuses.reduce((acc, status)=>{
-    const formattedKey  = status.replace(/\s+/g, "");
-    acc[formattedKey] = 
-    taskDistributionRaw.find((item) =>item._id === status)?.count || 0;
+    const taskDistribution = taskStatuses.reduce((acc, status) => {
+      const formattedKey = status.replace(/\s+/g, "");
+      acc[formattedKey] =
+        taskDistributionRaw.find((item) => item._id === status)?.count || 0;
       return acc;
-    },{});
+    }, {});
     taskDistribution["All"] = totalTasks;
 
-    const taskPriorities = ["Low" , "Medium" ,"High"];
+    const taskPriorities = ["Low", "Medium", "High"];
     const taskPriorityLevelRaw = await Task.aggregate([
       {
         $group: {
           _id: "$priority",
-          count: { $sum: 1},
+          count: { $sum: 1 },
         },
       },
     ]);
 
-    const taskPriorityLevels = taskPriorities.reduce((acc , priority)=>{
-      acc[priority] = 
-      taskPriorityLevelRaw.find((item) =>item._id === priority)?.count || 0;
+    const taskPriorityLevels = taskPriorities.reduce((acc, priority) => {
+      acc[priority] =
+        taskPriorityLevelRaw.find((item) => item._id === priority)?.count || 0;
       return acc;
     }, {});
 
     const recentTasks = await Task.find()
-      .sort({createdAt: -1})
+      .sort({ createdAt: -1 })
       .limit(10)
       .select("title status priority dueDate createdAt");
 
     res.status(200).json({
-      statistics:{
+      statistics: {
         totalTasks,
         pendingTasks,
         completedTasks,
         overdueTasks,
       },
-      charts:{
+      charts: {
         taskDistribution,
         taskPriorityLevels,
       },
@@ -354,81 +357,120 @@ const getDashboardData = async (req, res) => {
 
 // User-specific dashboard data
 const getUserDashboardData = async (req, res) => {
-    try {
-        // logic here
-      const userId = req.user._id;
+  try {
+    // logic here
+    const userId = req.user._id;
 
-      const totalTasks = await Task.countDocuments({assignedTo: userId});
-      const pendingTasks = await Task.countDocuments({assignedTo: userId, status: "pending"});
-      const completedTasks = await Task.countDocuments({assignedTo: userId , status: "Completed"});
-      const overdueTasks = await Task.countDocuments({
-        assignedTo: userId,
-        status: { $ne: "Completed" },
-        dueDate: { $lt: new Date() },
-      });
+    const totalTasks = await Task.countDocuments({ assignedTo: userId });
+    const pendingTasks = await Task.countDocuments({ assignedTo: userId, status: "pending" });
+    const completedTasks = await Task.countDocuments({ assignedTo: userId, status: "Completed" });
+    const overdueTasks = await Task.countDocuments({
+      assignedTo: userId,
+      status: { $ne: "Completed" },
+      dueDate: { $lt: new Date() },
+    });
 
-      const taskStatuses = ["pending" , " In Progress" , "Completed"];
-      const taskDistributionRaw = await Task.aggregate([
-        {$match: {assignedTo: userId}},
-        {$group: {_id: "$status", count: {$sum:1}}},
-      ]);
+    const taskStatuses = ["pending", " In Progress", "Completed"];
+    const taskDistributionRaw = await Task.aggregate([
+      { $match: { assignedTo: userId } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
 
-      const taskDistribution = taskStatuses.reduce((acc, status) => {
-        const formattedKey = status.replace(/\s+/g, "");
-        acc[formattedKey] =
+    const taskDistribution = taskStatuses.reduce((acc, status) => {
+      const formattedKey = status.replace(/\s+/g, "");
+      acc[formattedKey] =
         taskDistributionRaw.find((item) => item._id === status)?.count || 0;
-        return acc;
-      }, {});
-      
-      const taskPriorities = ["Low" , "Medium" , "High"];
-      const taskPriorityLevelRaw = await Task.aggregate([
-        {$match: {assignedTo: userId} },
-        {
-          $group: {
-            _id: "$priority",
-            count: { $sum: 1},
-          },
-        },
-      ]);
+      return acc;
+    }, {});
 
-      const taskPriorityLevels = taskPriorities.reduce((acc ,priority) => {
-        acc[priority] = 
+    const taskPriorities = ["Low", "Medium", "High"];
+    const taskPriorityLevelRaw = await Task.aggregate([
+      { $match: { assignedTo: userId } },
+      {
+        $group: {
+          _id: "$priority",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const taskPriorityLevels = taskPriorities.reduce((acc, priority) => {
+      acc[priority] =
         taskPriorityLevelRaw.find((item) => item._id === priority)?.count || 0;
-        return acc;
-      }, {});
-      
-      const recentTasks = await Task.find({assignedTo: userId})
-      .sort({createdAt: -1})
+      return acc;
+    }, {});
+
+    const recentTasks = await Task.find({ assignedTo: userId })
+      .sort({ createdAt: -1 })
       .limit(10)
       .select("title status priority dueDate createdAt");
 
-      res.status(200).json({
-        statistics:{
-          totalTasks,
-          pendingTasks,
-          completedTasks,
-          overdueTasks,
-        },
-        charts: {
-          taskDistribution,
-          taskPriorityLevels    
-        },
-        recentTasks,
-      });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
+    res.status(200).json({
+      statistics: {
+        totalTasks,
+        pendingTasks,
+        completedTasks,
+        overdueTasks,
+      },
+      charts: {
+        taskDistribution,
+        taskPriorityLevels
+      },
+      recentTasks,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 module.exports = {
-    getTasks,
-    getTaskById,
-    createTask,
-    updateTask,
-    deleteTask,
-    updateTaskStatus,
-    updateTaskCheckList,
-    getDashboardData,
-    getUserDashboardData,
+  getTasks,
+  getTaskById,
+  createTask,
+  updateTask,
+  deleteTask,
+  updateTaskStatus,
+  updateTaskCheckList,
+  getDashboardData,
+  getUserDashboardData,
+  addComment,
+  getComments,
 };
 
+
+// Add a comment to a task
+const addComment = async (req, res) => {
+  try {
+    const { text } = req.body;
+    const { id } = req.params;
+
+    if (!text) return res.status(400).json({ message: "Comment text is required" });
+
+    const comment = await Comment.create({
+      taskId: id,
+      userId: req.user._id,
+      text,
+    });
+
+    // Populate user details for immediate display
+    await comment.populate("userId", "name profileImageUrl");
+
+    res.status(201).json(comment);
+  } catch (error) {
+    res.status(500).json({ message: "Error adding comment", error: error.message });
+  }
+};
+
+// Get comments for a task
+const getComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const comments = await Comment.find({ taskId: id })
+      .populate("userId", "name profileImageUrl")
+      .sort({ createdAt: -1 }); // Newest first
+
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching comments", error: error.message });
+  }
+};

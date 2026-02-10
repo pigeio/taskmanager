@@ -11,14 +11,16 @@ const ManageTasks = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
+  const [filterPriority, setFilterPriority] = useState("All"); // New state
 
   const navigate = useNavigate();
 
   const getAllTasks = async () => {
     try {
-      const response = await axiosInstance.get(API_PATHS.TASKS.GET_ALL_TASKS, {
+      const response = await axiosInstance.get(API_PATHS.TASKS.GET_ALL, {
         params: {
           status: filterStatus === "All" ? "" : filterStatus,
+          priority: filterPriority === "All" ? "" : filterPriority, // Send priority
         },
       });
 
@@ -53,7 +55,7 @@ const ManageTasks = () => {
   return (
     <DashboardLayout>
       <div className='my-5'>
-        <div className='flex flex-col lg:flex-row lg:items-center justify-between'> 
+        <div className='flex flex-col lg:flex-row lg:items-center justify-between'>
           <div className='flex items-center justify-between gap-3'>
             <h2 className='text-xl md:text-xl font-medium'>My Tasks</h2>
             <button
@@ -63,40 +65,52 @@ const ManageTasks = () => {
               <LuFileSpreadsheet className='text-lg' />
               Download Report
             </button>
+
+            {/* Priority Filter */}
+            <select
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm outline-none"
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+            >
+              <option value="All">All Priorities</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
           </div>
 
           {tabs?.[0]?.count > 0 && (
             <div className='flex items-center gap-3'>
               <TaskStatusTabs
-              tabs={tabs}
-              activeTab={filterStatus}
-              setActivetab={setFilterStatus}
+                tabs={tabs}
+                activeTab={filterStatus}
+                setActivetab={setFilterStatus}
               />
 
               <button className='hidden lg:flex download-btn' onClick={handleDownloadReport}>
-                <LuFileSpreadsheet className='text-lg'/>
+                <LuFileSpreadsheet className='text-lg' />
               </button>
             </div>
           )}
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mt-4'>
-          {allTasks?.map((item , index) => (
+          {allTasks?.map((item, index) => (
             <TaskCard
-            key={item._id}
-            title={item.title}
-            description={item.description}
-            priority={item.priority}
-            status={item.status}
-            progress={item.progress}
-            createdAt={item.createdAt}
-            dueDate={item.dueDate}
-            assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
-            attachmentCount={item.attachment?.length || 0}
-            completedTodoCount={item.completedTodoCount || 0}
-            todoChecklist={item.todoChecklist || []}
-            onClick={()=> {
-              handleClick(item);
-            }}
+              key={item._id}
+              title={item.title}
+              description={item.description}
+              priority={item.priority}
+              status={item.status}
+              progress={item.progress}
+              createdAt={item.createdAt}
+              dueDate={item.dueDate}
+              assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
+              attachmentCount={item.attachment?.length || 0}
+              completedTodoCount={item.completedTodoCount || 0}
+              todoChecklist={item.todoChecklist || []}
+              onClick={() => {
+                handleClick(item);
+              }}
             />
           ))}
         </div>
